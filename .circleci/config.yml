@@ -1,0 +1,120 @@
+version: 2.1
+
+references:
+
+  container_config: &container_config
+    docker:
+      - image: circleci/node:10.16
+
+  load_repo: &load_repo
+    restore_cache:
+      key: v3-repo-{{ .Branch }}-{{ .Revision }}
+
+  load_packages: &load_packages
+    restore_cache:
+      key: v3-modules-{{ .Branch }}-{{ .Revision }}
+
+  load_build: &load_build
+    restore_cache:
+      key: v3-build-{{ .Branch }}-{{ .Revision }}
+
+  load_coverage_results: &load_coverage_results
+    restore_cache:
+      key: v3-coverage-{{ .Branch }}-{{ .Revision }}
+
+jobs:
+
+  build:
+    <<: *container_config
+    resource_class: large
+    steps:
+      - checkout
+      - run:
+          name: Apply settings to use private registry
+          command: npm login --registry=https://npm.pkg.github.com/
+      - save_cache:
+          key: v3-repo-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - ~/project
+      - run: 
+          name: Install Packages
+          command: yarn --frozen-lockfile
+      - save_cache:
+          key: v3-modules-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - ~/project/node_modules
+      - run: 
+          name: Build Library
+          command: yarn build
+      - save_cache:
+          key: v3-build-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - ~/project/lib
+            - ~/project/dist
+
+  test:
+    <<: *container_config
+    resource_class: large
+    steps:
+      - *load_repo
+      - *load_packages
+      - run:
+          command: yarn test
+          environment:
+            JEST_JUNIT_OUTPUT: ./test-reports/unit/test-results.xml
+      - store_test_results:
+         path: ~/project/test-reports
+      - save_cache:
+          key: v3-coverage-{{ .Branch }}-{{ .Revision }}
+          paths:
+            - ~/project/coverage
+
+  coverage:
+    <<: *container_config
+    resource_class: large
+    steps:
+      - *load_repo
+      - *load_packages
+      - *load_coverage_results
+      - run:
+          command: yarn coverage
+
+  publish:
+    <<: *container_config
+    resource_class: small
+    steps:
+      - *load_repo
+      - *load_build
+      - add_ssh_keys:
+          fingerprints:
+            - "5c:bd:ae:21:3a:9c:c1:46:9d:13:84:44:07:45:f0:41"
+      - run: |
+          mkdir -p ~/.ssh
+          touch ~/.ssh/known_hosts
+          ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+          git config user.name analytics-utils-autopublish
+          git config user.email eurostar.digital.tools+auto.github@gmail.com
+          npm publish
+
+workflows:
+  version: 2
+
+  build_test_deploy:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+      - coverage:
+          requires:
+            - test
+          filters:
+            branches:
+              only: master
+      - publish:
+          requires:
+            - build
+            - test
+          filters:
+            branches:
+              only: master

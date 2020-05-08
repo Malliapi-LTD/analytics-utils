@@ -1,0 +1,79 @@
+{
+  "name": "@malliapi/analytics-utils",
+  "version": "1.0.06",
+  "description": "Analytics Utilities library",
+  "main": "./dist/index.js",
+  "browser": "./lib/index.js",
+  "types": "@types/index.d.ts",
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
+  },
+  "scripts": {
+    "build:cjs": "rimraf dist && babel tslib --out-dir dist --ignore '**/stories.js,**/*.test.js' --source-maps inline",
+    "build:es": "rimraf tslib && tsc",
+    "build:es:js": "rimraf lib && BABEL_ENV=module babel tslib --out-dir lib --ignore '**/stories.js,**/*.test.js' --source-maps inline",
+    "build:types": "rimraf @types && tsc --emitDeclarationOnly --outDir @types",
+    "build": "yarn build:types && yarn build:es && yarn build:es:js && yarn build:cjs && rimraf tslib",
+    "coverage": "codecov",
+    "lint": "yarn lint:js",
+    "lint:js": "./node_modules/.bin/eslint ./src",
+    "prettier": "prettier --write \"**/*.{js,eslintrc,babelrc,prettierrc}\"",
+    "prepublishOnly": "./infrastructure/versioning.sh",
+    "test": "jest",
+    "test:ci": "jest --ci --coverage"
+  },
+  "files": [
+    "dist",
+    "lib",
+    "@types"
+  ],
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "src/**/*.js": [
+      "eslint"
+    ],
+    "*.js": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "author": "Chris Malliapi",
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@babel/cli": "7.8.4",
+    "@babel/core": "7.9.0",
+    "@babel/plugin-proposal-class-properties": "7.8.3",
+    "@babel/plugin-syntax-dynamic-import": "7.8.3",
+    "@babel/preset-typescript": "7.9.0",
+    "@babel/plugin-transform-runtime": "7.9.0",
+    "@babel/preset-env": "7.9.5",
+    "@types/jest": "25.2.1",
+    "babel-eslint": "10.1.0",
+    "codecov": "3.6.5",
+    "eslint": "6.8.0",
+    "eslint-config-airbnb-base": "14.1.0",
+    "eslint-config-prettier": "6.11.0",
+    "eslint-plugin-import": "2.20.2",
+    "eslint-plugin-jest": "23.8.2",
+    "eslint-plugin-jsdoc": "24.0.0",
+    "eslint-plugin-prettier": "3.1.3",
+    "husky": "4.2.5",
+    "jest": "25.4.0",
+    "jest-each": "25.4.0",
+    "jest-junit": "10.0.0",
+    "lint-staged": "10.1.7",
+    "prettier": "2.0.5",
+    "regenerator-runtime": "0.13.5",
+    "rimraf": "3.0.2",
+    "typescript": "^3.7.5"
+  },
+  "dependencies": {
+    "@babel/plugin-proposal-optional-chaining": "7.9.0",
+    "@babel/runtime": "7.9.2",
+    "lodash.get": "4.4.2"
+  }
+}

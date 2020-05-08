@@ -1,0 +1,17 @@
+# 1. Patch and minor versions are automatically merged (unless reviewers are required to merge)
+#    and running on a weekly schedule
+# 2. Please note that dependabot default behaviour is to be on a live schedule for security updates
+
+version: 1
+update_configs:
+  - package_manager: 'javascript'
+    directory: '/'
+    update_schedule: 'live'
+    automerged_updates:
+      - match:
+          dependency_type: 'all'
+          update_type: 'semver:minor'
+      - match:
+          dependency_type: 'all'
+          update_type: 'semver:patch'
+    version_requirement_updates: 'auto'
