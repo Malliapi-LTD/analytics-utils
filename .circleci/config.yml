@@ -30,7 +30,7 @@ jobs:
       - checkout
       - run:
           name: Apply settings to use private registry
-          command: npm login --registry=https://npm.pkg.github.com/
+          command: ./infrastructure/githubpackages.sh
       - save_cache:
           key: v3-repo-{{ .Branch }}-{{ .Revision }}
           paths:
@@ -81,7 +81,16 @@ jobs:
     steps:
       - *load_repo
       - *load_build
-      - run: npm publish
+      - add_ssh_keys:
+          fingerprints:
+            - "d3:6d:31:86:c9:98:d9:bd:52:52:52:28:a7:68:ce:64"
+      - run: |
+          mkdir -p ~/.ssh
+          touch ~/.ssh/known_hosts
+          ssh-keyscan -H github.com >> ~/.ssh/known_hosts
+          git config user.name bot-autopublish
+          git config user.email info@malliapi.co.uk
+          npm publish
 
 workflows:
   build_test_deploy:
