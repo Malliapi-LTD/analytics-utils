@@ -83,7 +83,7 @@ jobs:
       - *load_build
       - add_ssh_keys:
           fingerprints:
-            - "d3:6d:31:86:c9:98:d9:bd:52:52:52:28:a7:68:ce:64"
+            - "f5:9f:74:b4:16:b7:1d:eb:ec:0d:0d:04:b1:83:26:b8"
       - run: |
           mkdir -p ~/.ssh
           touch ~/.ssh/known_hosts
