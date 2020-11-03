@@ -1,6 +1,6 @@
 {
   "name": "@malliapi-ltd/analytics-utils",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Analytics Utilities library",
   "main": "./dist/index.js",
   "browser": "./lib/index.js",
